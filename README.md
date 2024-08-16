@@ -16,7 +16,7 @@ This is a Django-based blog application that includes features such as user auth
 
 - Python 3.8 or higher
 - Django 4.2 or higher
-- PostgreSQL (or other supported databases)
+
 
 ## Installation
 
