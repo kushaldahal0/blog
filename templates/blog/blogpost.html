@@ -1,0 +1,40 @@
+{% extends 'boilerplate.html'%}
+{% block title %}Blog Post{% endblock %}
+{% block header_url %}{% url 'blog:blogindex' %}{% endblock %}
+{% block header %}Create new Blog{% endblock %}
+{% block main %}
+<div class="container mx-auto px-4 py-8">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="flex flex-col items-center">
+            <h1 class="text-3xl font-bold mb-4">Welcome to the Blog post</h1>
+            <p class="mb-4">This is the where you create a blog</p>
+            <div class="mb-6 w-full max-w-lg">
+                <label for="title" class="block text-gray-700 text-sm font-bold mb-2">Title:</label>
+                <input type="text" id="title" name="title" class="dark:bg-gray-600 shadow  appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div class="mb-6 w-full max-w-lg">
+                <label for="author" class="block text-gray-700 text-sm font-bold mb-2">Author:</label>
+                <input type="text" id="author" name="author" class="dark:bg-gray-600 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div class="mb-6 w-full max-w-lg">
+                <label for="content" class="block text-gray-700 text-sm font-bold mb-2">Content:</label>
+                <textarea id="content" name="content" class="dark:bg-gray-600 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required></textarea>
+            </div>
+            <div class="mb-6 w-full max-w-lg">
+                <label for="category" class="block text-gray-700 text-sm font-bold mb-2">Category:</label>
+                <select id="category" name="category" class="dark:bg-gray-600 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="Technology">Technology</option>
+                    <option value="Automotive">Automotive</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Politics">Politics</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Culture">Culture</option>
+                </select>
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline">Submit</button>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

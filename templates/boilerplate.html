@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html class="dark" lang="en" x-data="{ open: false }" x-init="() => { open = false; }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Karla:400,700&display=swap');
+
+        .font-family-karla {
+            font-family: 'Karla', sans-serif;
+        }
+        /* Off-screen positioning for the modal */
+        .off-screen {
+            transform: translateX(-100vw); /* Move it off-screen */
+        }
+    </style>
+
+    <!-- AlpineJS -->
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js" integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs=" crossorigin="anonymous"></script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-800 dark:text-white flex flex-col min-h-screen" style='cursor: default;'>
+
+    <nav class="dark:bg-gray-900 dark:text-white shadow">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <a href="{% block header_url %}{% endblock %}" class="text-xl font-bold dark:text-light">
+                    {% block header %}{% endblock %}
+                </a>
+
+                <!-- Hamburger Menu Button for small screens -->
+                <div class="lg:hidden">
+                    <button @click="open = !open" class="text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 dark:text-gray-200">
+                        <svg class="h-6 w-6 fill-current" viewBox="0 0 24 24">
+                            <path x-show="!open" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M4 5h16a1 1 0 010 2H4a1 1 0 010-2zm0 6h16a1 1 0 010 2H4a1 1 0 010-2zm0 6h16a1 1 0 010 2H4a1 1 0 010-2z" />
+                            <path x-show="open" fill-rule="evenodd" clip-rule="evenodd"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Links for larger screens -->
+                <ul class="hidden lg:flex space-x-4">
+                    <li>
+                        <a href="{% url 'home:index' %}" class="hover:text-gray-600 dark:hover:text-gray-200 {% block homeactive %}{% endblock %}">Home</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'blog:blogindex' %}" class="hover:text-gray-600 dark:hover:text-gray-200 {% block blogactive %}{% endblock %}">Blogs</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'home:contact' %}" class="hover:text-gray-600 dark:hover:text-gray-200 {% block contactactive %}{% endblock %}">Contact</a>
+                    </li>
+                    <li>
+                        {% if user.is_authenticated %}
+                        <div x-data="{ open: false }" class="relative inline-block text-left">
+                            <div>
+                                <button @click="open = !open" type="button" class="inline-flex dark:text-white bg-grey-200 hover:bg-gray-300 border border-gray-900 rounded-lg text-sm px-3 font-medium py-1 inline-block">
+                                    {{ user.username }}
+                                    <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <!-- Dropdown menu -->
+                            <div x-show="open" @click.outside="open = false" class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1"
+                                x-transition:enter="transition ease-out duration-100 transform"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-75 transform"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95">
+                                <div class="py-1" role="none">
+                                    <a href="{% url 'home:logout' %}" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">Sign Out</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <a href="{% url 'home:login' %}" class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm px-3 font-medium py-1 inline-block">Sign In</a>
+                        <a href="{% url 'home:signup' %}" class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm px-3 font-medium py-1 inline-block">Sign Up</a>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Dropdown Menu for small screens -->
+            <div x-show="open" class="lg:hidden">
+                <ul class="flex flex-col space-y-4 mt-4">
+                    <li>
+                        <a href="{% url 'home:index' %}" class="hover:text-gray-600 dark:hover:text-gray-200 ">Home</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'blog:blogindex' %}" class="hover:text-gray-600 dark:hover:text-gray-200">Blogs</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'home:contact' %}" class="hover:text-gray-600 dark:hover:text-gray-200">Contact</a>
+                    </li>
+                    <li>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'home:logout' %}" class="hover:text-gray-600 dark:hover:text-gray-200">Sign Out</a>
+                        {% else %}
+                        <a href="{% url 'home:login' %}" class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm px-3 font-medium py-1 inline-block">Sign In</a>
+                        <a href="{% url 'home:signup' %}" class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm px-3 font-medium py-1 inline-block">Sign Up</a>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+        {% for message in messages %}
+            <div class="message-banner relative isolate flex items-center gap-x-6 overflow-hidden {{ message.tags }} bg-gray-50 px-6 py-2.5 sm:px-3.5 sm:before:flex-1">
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <p class="text-sm leading-6 text-gray-900">
+                        <strong class="font-semibold">Message:</strong>
+                        <svg viewBox="0 0 2 2" class="mx-2 inline h-0.5 w-0.5 fill-current" aria-hidden="true">
+                            <circle cx="1" cy="1" r="1" />
+                        </svg>
+                        {{ message }}
+                    </p>
+                </div>
+                <div class="flex flex-1 justify-end">
+                    <button class="dismiss-btn -m-3 p-3 focus-visible:outline-offset-[-4px]">
+                        <span class="sr-only">Dismiss</span>
+                        <svg class="h-5 w-5 text-gray-900" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+    <main class="flex-grow container mx-auto px-4 py-8">
+        {% block main %}
+        <!-- Content goes here -->
+        {% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-10 py-4">
+        <div class="container mx-auto text-center">
+            <p>© 2024 Blog, All rights reserved</p>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all dismiss buttons and banner elements
+            var dismissButtons = document.querySelectorAll('.dismiss-btn');
+            var banners = document.querySelectorAll('.message-banner');
+
+            // Loop through each dismiss button and attach a click event listener
+            dismissButtons.forEach(function(button, index) {
+                button.addEventListener('click', function() {
+                    // Hide the corresponding banner
+                    banners[index].style.display = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

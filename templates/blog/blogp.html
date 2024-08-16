@@ -1,0 +1,151 @@
+{% extends 'boilerplate.html'%}
+{% block title %}Blog{% endblock %}
+{% block header_url %}{% url 'blog:blogindex' %}{% endblock %}
+{% block header %}Blogs{% endblock %}
+{% block blogactive %}font-bold text-xl{% endblock %}
+{% block main %}
+
+<div class="container mx-auto px-4 py-8">
+    <header class="w-full container mx-auto">
+        <div class="flex flex-col items-center py-12">
+            <a class="font-bold text-light uppercase hover:text-gray-700 text-5xl" href="#">
+                {{ query }}
+            </a>
+            <p class="text-lg text-gray-600">
+                Lorem Ipsum Dolor Sit Amet
+            </p>
+        </div>
+    </header>
+    <div class='container flex item-center justify-between'>
+        <div class='p-2 container flex item-center justify-start'>
+            <a href="{% url 'blog:blogpost' %}">
+                <button class="bg-blue-500 hover:bg-blue-700                    text-white font-bold py-2 px-4 rounded                        focus:outline-none focus:shadow-outline">
+                Create New Blog
+                </button>
+            </a>
+        </div>
+        <form method="GET" action="{% url 'blog:search_posts' %}">
+            <div class='p-2 container flex item-center justify-end'>
+                <div class="relative flex items-center">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-500"></i>
+                    </div>
+                    <input 
+                        id="search" 
+                        name="search" 
+                        type="search" 
+                        placeholder="Search" 
+                        class="p-2 pl-10 text-sm text-gray-900 bg-gray-100 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                </div>
+            </div>
+        </form>
+    </div>
+    <!-- Topic Nav -->
+    <nav class="dark:bg-gray-200 w-full py-4 border-t border-b" x-data="{ open: false }">
+        <div class="block sm:hidden">
+            <a
+                href="#"
+                class="block md:hidden text-base font-bold uppercase text-center flex justify-center items-center"
+                @click="open = !open"
+            >
+                Topics <i :class="open ? 'fa-chevron-down': 'fa-chevron-up'" class="fas ml-2"></i>
+            </a>
+        </div>
+        <div :class="open ? 'block': 'hidden'" class="w-full flex-grow sm:flex sm:items-center sm:w-auto">
+            <div class="w-full  container mx-auto flex flex-col sm:flex-row items-center justify-center text-sm font-bold uppercase mt-0 px-6 py-2">
+                <a href="{% url 'blog:category_posts' category_name='Technology' %}" class="hover:bg-gray-400 rounded py-2 px-4 mx-2">Technology</a>
+                <a href="{% url 'blog:category_posts' category_name='Automotive' %}" class="hover:bg-gray-400 rounded py-2 px-4 mx-2">Automotive</a>
+                <a href="{% url 'blog:category_posts' category_name='Finance' %}" class="hover:bg-gray-400 rounded py-2 px-4 mx-2">Finance</a>
+                <a href="{% url 'blog:category_posts' category_name='Politics' %}" class="hover:bg-gray-400 rounded py-2 px-4 mx-2">Politics</a>
+                <a href="{% url 'blog:category_posts' category_name='Culture' %}" class="hover:bg-gray-400 rounded py-2 px-4 mx-2">Culture</a>
+                <a href="{% url 'blog:category_posts' category_name='Sports' %}" class="hover:bg-gray-400 rounded py-2 px-4 mx-2">Sports</a>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="container mx-auto flex flex-wrap py-6">
+
+        <!-- Posts Section -->
+        <section class="w-full md:w-2/3 flex flex-col items-center px-3">
+            {% if allposts %}
+                {% for post in allposts %}
+                    <article class="flex flex-col shadow-lg my-4 bg-white dark:bg-gray-900 max-w-full lg:max-w-lg xl:max-w-xl mx-auto" style="min-height: 300px;">
+                        <div class="flex flex-col justify-between p-6 h-full">
+                            <a href="#" class="text-blue-700 text-sm font-bold uppercase pb-4">{{ post.category }}</a>
+                            <a href="#" class="text-3xl font-bold hover:text-gray-700 pb-4">{{ post.title }}</a>
+                            <p class="text-sm pb-3">
+                                By <a href="#" class="font-semibold hover:text-gray-800">{{ post.author }}</a>, Published on {{ post.created_at|date:"M d, Y" }}
+                            </p>
+                            <p class="pb-6">{{ post.content|truncatechars:100 }}</p>
+                            <a href="{% url 'blog:singleb' post.b_no %}" class="uppercase text-blue-700 hover:text-black flex items-center">
+                                Continue Reading <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+                    </article>
+                {% endfor %}
+
+            {% else %}
+                <h1>No posts found.</h1>
+            {% endif %}
+
+
+
+            <!-- <article class="flex flex-col shadow my-4">
+                <div class="bg-white flex flex-col justify-start p-6">
+                    <a href="#" class="text-blue-700 text-sm font-bold uppercase pb-4">Automotive, Finance</a>
+                    <a href="#" class="text-3xl font-bold hover:text-gray-700 pb-4">Lorem Ipsum Dolor Sit Amet Dolor Sit Amet</a>
+                    <p href="#" class="text-sm pb-3">
+                        By <a href="#" class="font-semibold hover:text-gray-800">David Grzyb</a>, Published on January 12th, 2020
+                    </p>
+                    <a href="#" class="pb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus quis porta dui. Ut eu iaculis massa. Sed ornare ligula lacus, quis iaculis dui porta volutpat. In sit amet posuere magna..</a>
+                    <a href="#" class="uppercase text-gray-800 hover:text-black">Continue Reading <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+
+            <article class="flex flex-col shadow my-4">
+                <div class="bg-white flex flex-col justify-start p-6">
+                    <a href="#" class="text-blue-700 text-sm font-bold uppercase pb-4">Sports</a>
+                    <a href="#" class="text-3xl font-bold hover:text-gray-700 pb-4">Lorem Ipsum Dolor Sit Amet Dolor Sit Amet</a>
+                    <p href="#" class="text-sm pb-3">
+                        By <a href="#" class="font-semibold hover:text-gray-800">David Grzyb</a>, Published on October 22nd, 2019
+                    </p>
+                    <a href="#" class="pb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus quis porta dui. Ut eu iaculis massa. Sed ornare ligula lacus, quis iaculis dui porta volutpat. In sit amet posuere magna..</a>
+                    <a href="#" class="uppercase text-gray-800 hover:text-black">Continue Reading <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article> -->
+
+            <!-- Pagination -->
+            <div class="flex items-center py-8">
+                <a href="#" class="h-10 w-10 bg-blue-800 hover:bg-blue-600 font-semibold text-white text-sm flex items-center justify-center">1</a>
+                <a href="#" class="h-10 w-10 font-semibold  hover:bg-blue-600 hover:text-white text-sm flex items-center justify-center">2</a>
+                <a href="#" class="h-10 w-10 font-semibold hover:text-gray-900 text-sm flex items-center justify-center ml-3">Next <i class="fas fa-arrow-right ml-2"></i></a>
+            </div>
+
+        </section>
+
+        <!-- Sidebar Section -->
+        <aside class="w-full md:w-1/3 flex flex-col items-center px-3">
+
+            <div class="w-full  bg-white dark:bg-gray-900 shadow flex flex-col my-4 p-6">
+                <p class="text-xl font-semibold pb-5">About Us</p>
+                <p class="pb-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas mattis est eu odio sagittis tristique. Vestibulum ut finibus leo. In hac habitasse platea dictumst.</p>
+                <a href="#" class="w-full bg-blue-800 text-white font-bold text-sm uppercase rounded hover:bg-blue-700 flex items-center justify-center px-2 py-3 mt-4">
+                    Get to know us
+                </a>
+            </div>
+
+            <div class="w-full bg-white dark:bg-gray-900 shadow flex flex-col my-4 p-6">
+                <p class="text-xl font-semibold pb-5">Instagram</p>
+                <a href="#" class="w-full bg-blue-800 text-white font-bold text-sm uppercase rounded hover:bg-blue-700 flex items-center justify-center px-2 py-3 mt-6">
+                    <i class="fab fa-instagram mr-2"></i> Follow @anyone
+                </a>
+            </div>
+
+        </aside>
+
+    </div>
+</div>
+{% endblock %}
+

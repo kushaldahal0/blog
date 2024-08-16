@@ -1,0 +1,19 @@
+{% extends 'boilerplate.html'%}
+{% load static %}
+{% block title %}Home{% endblock %}
+{% block header_url %}{% url 'home:index' %}{% endblock %}
+{% block header %}Home{% endblock %}
+{% block homeactive %}font-bold text-xl{% endblock %}
+{% block main %}
+<div class="relative bg-cover bg-center">
+<!--style="background-image: url('{% static 'images/background.jpg' %}');"-->
+
+    <div class="flex items-center justify-center h-full">
+        <div class="text-center bg-white p-8 rounded-lg shadow-lg">
+            <h1 class="text-3xl font-bold mb-4">Welcome to the Home Page</h1>
+            <p class="mb-4">This is the home page of the website.</p>
+            <p>You can add your content here.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

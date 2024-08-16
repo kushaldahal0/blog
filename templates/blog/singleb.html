@@ -1,0 +1,140 @@
+{% extends 'boilerplate.html'%}
+{% block title %}Blog Post{% endblock %}
+{% block header %}{{post.title}}{% endblock %}
+{% block main %}
+{% load humanize %}
+<div class="container mx-auto sm:px-4 py-8 px-0">
+    <section class="w-full flex flex-col items-center px-0 overflow-x-hidden">
+        <article class="flex flex-col bg-white dark:bg-gray-500 shadow-lg my-4 max-w-full lg:max-w-2xl xl:max-w-3xl mx-auto">
+            <div class="flex flex-col justify-between sm:p-8 p-1 h-full">
+                <a href="#" class="text-blue-700 text-lg font-bold uppercase pb-4">{{ post.category }}</a>
+                <h1 class="text-4xl font-extrabold hover:text-gray-700 pb-6">{{ post.title }}</h1>
+                <p class="text-lg pb-4">
+                    By <a href="#" class="font-semibold hover:text-gray-800">{{ post.author }}</a> <br>
+                    Last updated on {{ post.updated_at| naturaltime }} <br>
+                    Initially Published on {{ post.created_at|date:"M d, Y" }}
+                </p>
+                <div class="text-xl text-justify leading-relaxed pb-8">
+                    {{ post.content }}
+                </div>
+            </div>
+            <hr>
+            <div class="flex flex-col justify-between sm:p-8 p-1 h-full">
+                <h1 class="text-4xl font-extrabold hover:text-gray-700 pb-6">Comments 
+                    {% if counts > 0 %}
+                        <span class='font-semibold text-blue-700'>({{ counts }})</span>
+                    {% endif %}
+                </h1>
+                {% for comment, replies in comment_dict.items %}
+                <div class="flex flex-col space-y-2 my-3">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user text-blue-500 text-2xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="font-bold text-blue-700">{{ comment.user.username }}</p>
+                            <p class="text-sm text-gray-600">{{ comment.created_at|naturaltime }}</p>
+                        </div>
+                    </div>
+
+                    <div class="ml-8">
+                        <p class="mt-2 text-gray-800">{{ comment.content }}</p>
+
+                        <!-- Collapse Button -->
+                        <button @click="open = !open" class="mt-2 text-sm text-blue-700 hover:underline">
+                            <span x-show="!open">Reply</span>
+                            <span x-show="open">Cancel</span>
+                        </button>
+
+                        <!-- Collapsible Reply Section -->
+                        <div x-show="open" class="mt-4 space-y-4">
+                            {% if user.is_authenticated %}
+                            <form action="{% url 'blog:comment' %}" method="post">
+                                {% csrf_token %}
+                                <textarea id="content" name="content" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Write your reply..." required></textarea>
+                                <input type="hidden" name="postb_no" value="{{ post.b_no }}">
+                                <input type="hidden" name="parentc_no" value="{{ comment.c_no }}">
+                                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline mt-2">
+                                    Submit Reply
+                                </button>
+                            </form>
+                            {% else %}
+                                <div>
+                                    <p class="text-sm text-center pb-4">
+                                        Please <a href="{% url 'home:login' %}" class="font-semibold hover:text-gray-800">login</a> to reply comments
+                                    </p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Display Replies -->
+                        <div class="mt-4 pl-4 border-l">
+                            {% for reply in replies %}
+                                <div class="flex flex-col space-y-2 my-3">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-user text-green-500 text-2xl"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <p class="font-bold text-green-700">{{ reply.user.username }}</p>
+                                            <p class="text-sm text-gray-600">{{ reply.created_at|naturaltime }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="ml-8">
+                                        <p class="mt-2 text-gray-800">{{ reply.content }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                
+            </div>
+            <hr>
+            <div class="flex flex-col justify-between sm:p-8 p-1 h-full">
+                {% if user.is_authenticated %}
+
+                    <p class="text-lg pb-4">
+                        Post comment here
+                    </p>
+                    <div class="text-xl text-justify leading-relaxed pb-8">
+                        <form action = "{% url 'blog:comment' %}" method='post'>
+                            {% csrf_token %}
+                            <textarea id="content" name="content" class="dark:bg-gray-600 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 text-lg leading-tight focus:outline-none focus:shadow-outline" required></textarea>
+                                <input type="hidden" name="postb_no" value='{{ post.b_no }}'>
+                            <input type="hidden" name='parentc_no' value=''>
+                                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline">Submit</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <div>
+                        <h4 class="text-lg text-center pb-4">
+                            Please <a href="{% url 'home:login' %}" class="font-semibold hover:text-gray-800">login</a> to comment
+                        </h4>
+                    </div>
+                {% endif %}
+            </div>
+        </article>
+        <!-- <article class="flex flex-col bg-white dark:bg-gray-500 shadow-lg my-4 max-w-full lg:max-w-2xl xl:max-w-3xl mx-auto">
+            <div class="flex flex-col justify-between sm:p-8 p-1 h-full">
+                <a href="#" class="text-blue-700 text-lg font-bold uppercase pb-4"></a>
+        </article> -->
+    </section>
+</div>
+{% endblock %}
+<!-- Example Reply -->
+<!-- <div class="flex items-start">
+    <div class="flex-shrink-0">
+        <i class="fas fa-user text-gray-500 text-xl"></i>
+    </div>
+    <div class="ml-4">
+        <p class="font-bold text-gray-700">User Reply</p>
+        <p class="text-sm text-gray-600">Reply time</p>
+        <div class="mt-2 text-gray-800">
+            This is a reply to the comment.
+        </div>
+    </div>
+</div> -->
+<!-- Additional replies go here -->
