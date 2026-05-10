@@ -14,10 +14,6 @@
                 <input type="text" id="title" name="title" class="dark:bg-gray-600 shadow  appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
             </div>
             <div class="mb-6 w-full max-w-lg">
-                <label for="author" class="block text-gray-700 text-sm font-bold mb-2">Author:</label>
-                <input type="text" id="author" name="author" class="dark:bg-gray-600 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
-            </div>
-            <div class="mb-6 w-full max-w-lg">
                 <label for="content" class="block text-gray-700 text-sm font-bold mb-2">Content:</label>
                 <textarea id="content" name="content" class="dark:bg-gray-600 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required></textarea>
             </div>
@@ -37,4 +33,13 @@
     </form>
 
 </div>
+<script>
+    tinymce.init({
+        selector: '#content',
+        plugins: 'lists link image code',
+        toolbar: 'bold italic underline | bullist numlist | link image | code',
+        menubar: false,
+        height: 300
+    });
+</script>
 {% endblock %}

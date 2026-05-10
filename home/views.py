@@ -5,9 +5,12 @@ from home.models import Contact
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django_ratelimit.decorators import ratelimit
+from blog.models import Post
+from blog.models import Post
 
 def index(request):
-    content = {'hello':'hello'}
+    latest_posts = Post.objects.all().order_by('-created_at')[:3]
+    content = {'latest_posts': latest_posts}
     return render(request, 'home/index.html',content)
 
 @ratelimit(key='ip', rate='3/m', method='ALL', block=True)
@@ -97,6 +100,37 @@ def plogout(request):
     logout(request)
     messages.success(request,"You are logged out successfully")
     return redirect('home:index')
+
+@ratelimit(key='ip', rate='5/m', method='ALL', block=True)
+def profile(request):
+    if not request.user.is_authenticated:
+        messages.error(request, 'You must be logged in to view your profile.')
+        return redirect('home:login')
+    
+    user_posts = Post.objects.filter(author=request.user).order_by('-created_at')
+    
+    if request.method == "POST":
+        username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        
+        # Check if username is already taken by another user
+        if User.objects.filter(username=username).exclude(id=request.user.id).exists():
+            messages.error(request, 'Username already exists. Please choose a different one.')
+        else:
+            request.user.username = username
+            request.user.first_name = first_name
+            request.user.last_name = last_name
+            request.user.email = email
+            request.user.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('home:profile')
+    
+    content = {
+        'user_posts': user_posts,
+    }
+    return render(request, 'home/profile.html', content)
 
 def page_not_found(request,exception):
     return render(request, 'home/missing.html', status = 404)

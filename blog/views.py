@@ -1,21 +1,30 @@
 from django.contrib import messages
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from blog.models import Post,Comment
 from django_ratelimit.decorators import ratelimit
+from django.core.paginator import Paginator
+from django.conf import settings
 
 
 # Create your views here.
 def index(request):
-  allposts = Post.objects.all()
-  contents = {'allposts': allposts,'query': 'Minimal Blog'}
+  allposts = Post.objects.all().order_by('-created_at')
+  paginator = Paginator(allposts, 6)  # Show 6 posts per page
+  page_number = request.GET.get('page')
+  page_obj = paginator.get_page(page_number)
+  contents = {'page_obj': page_obj,'query': 'Minimal Blog'}
   return render(request, 'blog/blogp.html', contents)
 
 @ratelimit(key='ip', rate='3/m', method='ALL', block=True)
 def blogpost(request):
+  if not request.user.is_authenticated:
+    messages.error(request, 'You must be logged in to create a post.')
+    return redirect('home:login')
+  
   if request.method == "POST":
     title = request.POST.get('title')
     content = request.POST.get('content')
-    author = request.POST.get('author')
+    author = request.user
     category = request.POST.get('category')
     try:
       # Attempt to save the post
@@ -33,11 +42,11 @@ def blogpost(request):
       messages.error(
           request,
           'Your post has not been submitted! Error: {}'.format(str(e)))
-  return render(request, 'blog/blogpost.html')
+  return render(request, 'blog/blogpost.html', {'tinymce_api_key': settings.TINYMCE_API_KEY})
 
 
-def singleb(request, b_no):
-  post = Post.objects.get(b_no=b_no)
+def singleb(request, slug):
+  post = Post.objects.get(slug=slug)
   comments = Comment.objects.filter(post=post, parent = None)
   counts = Comment.objects.filter(post=post).count()
   # Build a dictionary to store replies under their parent comment
@@ -58,10 +67,10 @@ def postcomment(request):
   if request.method == "POST":
     content = request.POST.get('content')
     user = request.user
-    postb_no = request.POST.get('postb_no')
+    post_slug = request.POST.get('post_slug')
     parentc_no = request.POST.get('parentc_no')
     
-    post = Post.objects.get(b_no = postb_no)
+    post = Post.objects.get(slug=post_slug)
     try:
       if parentc_no == '':
         # Attempt to save the comment
@@ -82,7 +91,7 @@ def postcomment(request):
       messages.error(
           request,
           'Your comment has not been submitted! Error: {}'.format(str(e)))
-    return redirect('blog:singleb', b_no=postb_no)
+    return redirect('blog:singleb_slug', slug=post_slug)
         
       
 
@@ -93,24 +102,61 @@ def search_posts(request):
     results = Post.objects.filter(
         title__icontains=query
     ) | Post.objects.filter(
-        author__icontains=query
+        author__username__icontains=query
     ) | Post.objects.filter(
         content__icontains=query
     ) | Post.objects.filter(
         category__icontains=query
-    )
+    ).order_by('-created_at')
   else:
     results = Post.objects.none()
 
-  contents = {'allposts': results, 'query' : "Search Results for: "+query}
+  paginator = Paginator(results, 6)
+  page_number = request.GET.get('page')
+  page_obj = paginator.get_page(page_number)
+
+  contents = {'page_obj': page_obj, 'query' : "Search Results for: "+query}
 
   return render(request, 'blog/blogp.html', contents)
 
 
+def edit_post(request, slug):
+    if not request.user.is_authenticated:
+        messages.error(request, 'You must be logged in to edit posts.')
+        return redirect('home:login')
+    
+    post = get_object_or_404(Post, slug=slug)
+    
+    if post.author != request.user:
+        messages.error(request, 'You can only edit your own posts.')
+        return redirect('blog:singleb_slug', slug=slug)
+    
+    if request.method == "POST":
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        category = request.POST.get('category')
+        
+        post.title = title
+        post.content = content
+        post.category = category
+        post.save()
+        
+        messages.success(request, 'Your post has been updated successfully!')
+        return redirect('blog:singleb_slug', slug=post.slug)
+    
+    contents = {'post': post, 'tinymce_api_key': settings.TINYMCE_API_KEY}
+    return render(request, 'blog/edit_post.html', contents)
+
+
 def category(request, category_name):
   if category_name:
-    results = Post.objects.filter(category=category_name)
+    results = Post.objects.filter(category=category_name).order_by('-created_at')
   else:
-    results = Post.objects.all()
-  contents = {'allposts': results, 'query': category_name}
+    results = Post.objects.all().order_by('-created_at')
+  
+  paginator = Paginator(results, 6)
+  page_number = request.GET.get('page')
+  page_obj = paginator.get_page(page_number)
+  
+  contents = {'page_obj': page_obj, 'query': category_name}
   return render(request, 'blog/blogp.html', contents)

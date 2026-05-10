@@ -9,13 +9,18 @@
             <div class="flex flex-col justify-between sm:p-8 p-1 h-full">
                 <a href="#" class="text-blue-700 text-lg font-bold uppercase pb-4">{{ post.category }}</a>
                 <h1 class="text-4xl font-extrabold hover:text-gray-700 pb-6">{{ post.title }}</h1>
+                {% if user.is_authenticated and user == post.author %}
+                <div class="pb-4">
+                    <a href="{% url 'blog:edit_post' post.slug %}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Edit Post</a>
+                </div>
+                {% endif %}
                 <p class="text-lg pb-4">
-                    By <a href="#" class="font-semibold hover:text-gray-800">{{ post.author }}</a> <br>
+                    By <a href="#" class="font-semibold hover:text-gray-800">{{ post.author.username }}</a> <br>
                     Last updated on {{ post.updated_at| naturaltime }} <br>
                     Initially Published on {{ post.created_at|date:"M d, Y" }}
                 </p>
                 <div class="text-xl text-justify leading-relaxed pb-8">
-                    {{ post.content }}
+                    {{ post.content|safe }}
                 </div>
             </div>
             <hr>
@@ -52,7 +57,7 @@
                             <form action="{% url 'blog:comment' %}" method="post">
                                 {% csrf_token %}
                                 <textarea id="content" name="content" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Write your reply..." required></textarea>
-                                <input type="hidden" name="postb_no" value="{{ post.b_no }}">
+                                <input type="hidden" name="post_slug" value="{{ post.slug }}">
                                 <input type="hidden" name="parentc_no" value="{{ comment.c_no }}">
                                 <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline mt-2">
                                     Submit Reply
@@ -103,7 +108,7 @@
                         <form action = "{% url 'blog:comment' %}" method='post'>
                             {% csrf_token %}
                             <textarea id="content" name="content" class="dark:bg-gray-600 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 text-lg leading-tight focus:outline-none focus:shadow-outline" required></textarea>
-                                <input type="hidden" name="postb_no" value='{{ post.b_no }}'>
+                                <input type="hidden" name="post_slug" value='{{ post.slug }}'>
                             <input type="hidden" name='parentc_no' value=''>
                                 <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline">Submit</button>
                         </form>

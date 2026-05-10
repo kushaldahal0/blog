@@ -1,10 +1,20 @@
 <!DOCTYPE html>
-<html class="dark" lang="en" x-data="{ open: false }" x-init="() => { open = false; }">
+<html lang="en" x-data="{ open: false }" x-init="() => { open = false; }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script>
+        // Enable dark mode for Tailwind CSS
+        if (typeof window !== 'undefined') {
+            const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+            localStorage.setItem('theme', theme);
+        }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css?family=Karla:400,700&display=swap');
 
@@ -21,6 +31,8 @@
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
     <!-- Font Awesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js" integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs=" crossorigin="anonymous"></script>
+    <!-- TinyMCE -->
+    <script src="https://cdn.tiny.cloud/1/{{ tinymce_api_key }}/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-800 dark:text-white flex flex-col min-h-screen" style='cursor: default;'>
 
@@ -55,6 +67,16 @@
                         <a href="{% url 'home:contact' %}" class="hover:text-gray-600 dark:hover:text-gray-200 {% block contactactive %}{% endblock %}">Contact</a>
                     </li>
                     <li>
+                        <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                            <svg id="sun-icon" class="w-5 h-5 text-gray-800 dark:text-gray-200" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <svg id="moon-icon" class="w-5 h-5 text-gray-800 dark:text-gray-200 hidden" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                            </svg>
+                        </button>
+                    </li>
+                    <li>
                         {% if user.is_authenticated %}
                         <div x-data="{ open: false }" class="relative inline-block text-left">
                             <div>
@@ -74,7 +96,8 @@
                                 x-transition:leave-start="opacity-100 scale-100"
                                 x-transition:leave-end="opacity-0 scale-95">
                                 <div class="py-1" role="none">
-                                    <a href="{% url 'home:logout' %}" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1">Sign Out</a>
+                                    <a href="{% url 'home:profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600" role="menuitem" tabindex="-1">Profile</a>
+                                    <a href="{% url 'home:logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600" role="menuitem" tabindex="-1">Sign Out</a>
                                 </div>
                             </div>
                         </div>
@@ -100,6 +123,7 @@
                     </li>
                     <li>
                         {% if user.is_authenticated %}
+                        <a href="{% url 'home:profile' %}" class="hover:text-gray-600 dark:hover:text-gray-200">Profile</a>
                         <a href="{% url 'home:logout' %}" class="hover:text-gray-600 dark:hover:text-gray-200">Sign Out</a>
                         {% else %}
                         <a href="{% url 'home:login' %}" class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg text-sm px-3 font-medium py-1 inline-block">Sign In</a>
@@ -140,7 +164,7 @@
 
     <footer class="bg-gray-800 text-white mt-10 py-4">
         <div class="container mx-auto text-center">
-            <p>© 2024 Blog, All rights reserved</p>
+            <p>© {% now "Y" %} Blog, All rights reserved</p>
         </div>
     </footer>
     <script>
@@ -148,13 +172,44 @@
             // Get all dismiss buttons and banner elements
             var dismissButtons = document.querySelectorAll('.dismiss-btn');
             var banners = document.querySelectorAll('.message-banner');
-
-            // Loop through each dismiss button and attach a click event listener
-            dismissButtons.forEach(function(button, index) {
+            
+            dismissButtons.forEach(function(button) {
                 button.addEventListener('click', function() {
-                    // Hide the corresponding banner
-                    banners[index].style.display = 'none';
+                    var banner = button.closest('.message-banner');
+                    if (banner) {
+                        banner.style.display = 'none';
+                    }
                 });
+            });
+
+            // Dark mode toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+            
+            // Function to update theme
+            function updateTheme(theme) {
+                if (theme === 'dark') {
+                    html.classList.add('dark');
+                    sunIcon.classList.add('hidden');
+                    moonIcon.classList.remove('hidden');
+                } else {
+                    html.classList.remove('dark');
+                    sunIcon.classList.remove('hidden');
+                    moonIcon.classList.add('hidden');
+                }
+                localStorage.setItem('theme', theme);
+            }
+            
+            // Initialize theme
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            updateTheme(currentTheme);
+            
+            // Theme toggle event listener
+            themeToggle.addEventListener('click', function() {
+                const newTheme = html.classList.contains('dark') ? 'light' : 'dark';
+                updateTheme(newTheme);
             });
         });
     </script>

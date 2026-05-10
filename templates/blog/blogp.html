@@ -12,17 +12,21 @@
                 {{ query }}
             </a>
             <p class="text-lg text-gray-600">
-                Lorem Ipsum Dolor Sit Amet
+                Discover insights, stories, and perspectives from our community
             </p>
         </div>
     </header>
     <div class='container flex item-center justify-between'>
         <div class='p-2 container flex item-center justify-start'>
+            {% if user.is_authenticated %}
             <a href="{% url 'blog:blogpost' %}">
                 <button class="bg-blue-500 hover:bg-blue-700                    text-white font-bold py-2 px-4 rounded                        focus:outline-none focus:shadow-outline">
                 Create New Blog
                 </button>
             </a>
+            {% else %}
+            <p class="text-gray-600">Login to create posts</p>
+            {% endif %}
         </div>
         <form method="GET" action="{% url 'blog:search_posts' %}">
             <div class='p-2 container flex item-center justify-end'>
@@ -69,59 +73,43 @@
 
         <!-- Posts Section -->
         <section class="w-full md:w-2/3 flex flex-col items-center px-3">
-            {% if allposts %}
-                {% for post in allposts %}
+            {% if page_obj %}
+                {% for post in page_obj %}
                     <article class="flex flex-col shadow-lg my-4 bg-white dark:bg-gray-900 max-w-full lg:max-w-lg xl:max-w-xl mx-auto" style="min-height: 300px;">
                         <div class="flex flex-col justify-between p-6 h-full">
                             <a href="#" class="text-blue-700 text-sm font-bold uppercase pb-4">{{ post.category }}</a>
-                            <a href="#" class="text-3xl font-bold hover:text-gray-700 pb-4">{{ post.title }}</a>
+                            <a href="{% url 'blog:singleb_slug' post.slug %}" class="text-3xl font-bold hover:text-gray-700 pb-4">{{ post.title }}</a>
                             <p class="text-sm pb-3">
-                                By <a href="#" class="font-semibold hover:text-gray-800">{{ post.author }}</a>, Published on {{ post.created_at|date:"M d, Y" }}
+                                By <a href="#" class="font-semibold hover:text-gray-800">{{ post.author.username }}</a>, Published on {{ post.created_at|date:"M d, Y" }}
                             </p>
-                            <p class="pb-6">{{ post.content|truncatechars:100 }}</p>
-                            <a href="{% url 'blog:singleb' post.b_no %}" class="uppercase text-blue-700 hover:text-black flex items-center">
+                            <p class="pb-6">{{ post.content|striptags|truncatechars:100 }}</p>
+                            <a href="{% url 'blog:singleb_slug' post.slug %}" class="uppercase text-blue-700 hover:text-black flex items-center">
                                 Continue Reading <i class="fas fa-arrow-right ml-2"></i>
                             </a>
                         </div>
                     </article>
                 {% endfor %}
 
+                <!-- Pagination -->
+                {% if page_obj.paginator.num_pages > 1 %}
+                <div class="flex justify-center mt-8">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="mx-1 px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">&laquo; First</a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="mx-1 px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Previous</a>
+                    {% endif %}
+
+                    <span class="mx-1 px-3 py-2 bg-blue-500 text-white rounded">{{ page_obj.number }}</span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="mx-1 px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="mx-1 px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Last &raquo;</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
             {% else %}
                 <h1>No posts found.</h1>
             {% endif %}
-
-
-
-            <!-- <article class="flex flex-col shadow my-4">
-                <div class="bg-white flex flex-col justify-start p-6">
-                    <a href="#" class="text-blue-700 text-sm font-bold uppercase pb-4">Automotive, Finance</a>
-                    <a href="#" class="text-3xl font-bold hover:text-gray-700 pb-4">Lorem Ipsum Dolor Sit Amet Dolor Sit Amet</a>
-                    <p href="#" class="text-sm pb-3">
-                        By <a href="#" class="font-semibold hover:text-gray-800">David Grzyb</a>, Published on January 12th, 2020
-                    </p>
-                    <a href="#" class="pb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus quis porta dui. Ut eu iaculis massa. Sed ornare ligula lacus, quis iaculis dui porta volutpat. In sit amet posuere magna..</a>
-                    <a href="#" class="uppercase text-gray-800 hover:text-black">Continue Reading <i class="fas fa-arrow-right"></i></a>
-                </div>
-            </article>
-
-            <article class="flex flex-col shadow my-4">
-                <div class="bg-white flex flex-col justify-start p-6">
-                    <a href="#" class="text-blue-700 text-sm font-bold uppercase pb-4">Sports</a>
-                    <a href="#" class="text-3xl font-bold hover:text-gray-700 pb-4">Lorem Ipsum Dolor Sit Amet Dolor Sit Amet</a>
-                    <p href="#" class="text-sm pb-3">
-                        By <a href="#" class="font-semibold hover:text-gray-800">David Grzyb</a>, Published on October 22nd, 2019
-                    </p>
-                    <a href="#" class="pb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus quis porta dui. Ut eu iaculis massa. Sed ornare ligula lacus, quis iaculis dui porta volutpat. In sit amet posuere magna..</a>
-                    <a href="#" class="uppercase text-gray-800 hover:text-black">Continue Reading <i class="fas fa-arrow-right"></i></a>
-                </div>
-            </article> -->
-
-            <!-- Pagination -->
-            <div class="flex items-center py-8">
-                <a href="#" class="h-10 w-10 bg-blue-800 hover:bg-blue-600 font-semibold text-white text-sm flex items-center justify-center">1</a>
-                <a href="#" class="h-10 w-10 font-semibold  hover:bg-blue-600 hover:text-white text-sm flex items-center justify-center">2</a>
-                <a href="#" class="h-10 w-10 font-semibold hover:text-gray-900 text-sm flex items-center justify-center ml-3">Next <i class="fas fa-arrow-right ml-2"></i></a>
-            </div>
 
         </section>
 
@@ -130,7 +118,7 @@
 
             <div class="w-full  bg-white dark:bg-gray-900 shadow flex flex-col my-4 p-6">
                 <p class="text-xl font-semibold pb-5">About Us</p>
-                <p class="pb-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas mattis est eu odio sagittis tristique. Vestibulum ut finibus leo. In hac habitasse platea dictumst.</p>
+                <p class="pb-2">Welcome to our blog community! We share thoughtful articles on technology, lifestyle, finance, and culture. Our writers bring diverse perspectives and expertise to help you stay informed and inspired. Join the conversation and share your thoughts in the comments.</p>
                 <a href="#" class="w-full bg-blue-800 text-white font-bold text-sm uppercase rounded hover:bg-blue-700 flex items-center justify-center px-2 py-3 mt-4">
                     Get to know us
                 </a>
@@ -139,7 +127,7 @@
             <div class="w-full bg-white dark:bg-gray-900 shadow flex flex-col my-4 p-6">
                 <p class="text-xl font-semibold pb-5">Instagram</p>
                 <a href="#" class="w-full bg-blue-800 text-white font-bold text-sm uppercase rounded hover:bg-blue-700 flex items-center justify-center px-2 py-3 mt-6">
-                    <i class="fab fa-instagram mr-2"></i> Follow @anyone
+                    <i class="fab fa-instagram mr-2"></i> Follow @minimalblog
                 </a>
             </div>
 
