@@ -1,7 +1,4 @@
 # Django Blog Project
-
-## Overview
-
 This is a Django-based blog application that includes features such as user authentication, blog posting, commenting, and more. The project is styled with Tailwind CSS and uses Font Awesome for icons.
 
 ## Features
