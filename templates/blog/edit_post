@@ -1,0 +1,48 @@
+{% extends 'boilerplate.html'%}
+{% block title %}Edit Blog Post{% endblock %}
+{% block header_url %}{% url 'blog:blogindex' %}{% endblock %}
+{% block header %}Edit Blog Post{% endblock %}
+{% block main %}
+<div class="container mx-auto px-4 py-8">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="flex flex-col items-center">
+            <h1 class="text-3xl font-bold mb-4">Edit Your Blog Post</h1>
+            <p class="mb-4">Make changes to your post</p>
+            <div class="mb-6 w-full max-w-lg">
+                <label for="title" class="block text-gray-700 text-sm font-bold mb-2">Title:</label>
+                <input type="text" id="title" name="title" value="{{ post.title }}" class="dark:bg-gray-600 shadow  appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div class="mb-6 w-full max-w-lg">
+                <label for="content" class="block text-gray-700 text-sm font-bold mb-2">Content:</label>
+                <textarea id="content" name="content" class="dark:bg-gray-600 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>{{ post.content }}</textarea>
+            </div>
+            <div class="mb-6 w-full max-w-lg">
+                <label for="category" class="block text-gray-700 text-sm font-bold mb-2">Category:</label>
+                <select id="category" name="category" class="dark:bg-gray-600 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="Technology" {% if post.category == 'Technology' %}selected{% endif %}>Technology</option>
+                    <option value="Automotive" {% if post.category == 'Automotive' %}selected{% endif %}>Automotive</option>
+                    <option value="Finance" {% if post.category == 'Finance' %}selected{% endif %}>Finance</option>
+                    <option value="Politics" {% if post.category == 'Politics' %}selected{% endif %}>Politics</option>
+                    <option value="Sports" {% if post.category == 'Sports' %}selected{% endif %}>Sports</option>
+                    <option value="Culture" {% if post.category == 'Culture' %}selected{% endif %}>Culture</option>
+                </select>
+            </div>
+            <div class="flex space-x-4">
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline">Update Post</button>
+                <a href="{% url 'blog:singleb_slug' post.slug %}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline">Cancel</a>
+            </div>
+        </div>
+    </form>
+
+</div>
+<script>
+    tinymce.init({
+        selector: '#content',
+        plugins: 'lists link image code',
+        toolbar: 'bold italic underline | bullist numlist | link image | code',
+        menubar: false,
+        height: 300
+    });
+</script>
+{% endblock %}
